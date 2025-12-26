@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>New Year Countdown</title>
+
+  <!--
+    Yodeck-ready single-file HTML countdown.
+    Default target: Jan 1, 2026 00:00:00 in America/New_York.
+    You can customize colors/text in the CONFIG section below.
+  -->
+
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#1b2a5a;
+      --card: rgba(255,255,255,0.08);
+      --stroke: rgba(255,255,255,0.12);
+      --text:#ffffff;
+      --muted: rgba(255,255,255,0.75);
+      --accent:#ffd36b;
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --radius: 28px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 700px at 10% 15%, rgba(255,211,107,0.25), transparent 55%),
+        radial-gradient(900px 600px at 90% 20%, rgba(120,171,255,0.25), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+
+    .wrap{
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 48px;
+    }
+
+    .panel{
+      width:min(1200px, 100%);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: clamp(28px, 4vw, 56px);
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 18px;
+      margin-bottom: clamp(18px, 2.5vw, 28px);
+    }
+
+    .headline{
+      font-size: clamp(34px, 4.6vw, 64px);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      margin:0;
+    }
+
+    .sub{
+      margin-top: 10px;
+      font-size: clamp(16px, 1.7vw, 22px);
+      color: var(--muted);
+      max-width: 44ch;
+    }
+
+    .yearBadge{
+      flex:0 0 auto;
+      font-weight: 800;
+      font-size: clamp(18px, 2vw, 28px);
+      letter-spacing: 0.08em;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.15);
+      color: var(--accent);
+      text-transform: uppercase;
+      align-self:flex-start;
+      user-select:none;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(12px, 2vw, 18px);
+    }
+
+    .tile{
+      background: rgba(0,0,0,0.18);
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      padding: clamp(14px, 2.2vw, 24px);
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .num{
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      font-size: clamp(42px, 6vw, 92px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin: 4px 0 10px;
+    }
+
+    .label{
+      color: var(--muted);
+      font-size: clamp(14px, 1.4vw, 18px);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .footer{
+      margin-top: clamp(18px, 2.5vw, 28px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: clamp(12px, 1.2vw, 16px);
+    }
+
+    .right{
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    /* subtle sparkle dots */
+    .sparkle{
+      position:absolute;
+      inset:-40px;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.7) 40%, transparent 41%),
+        radial-gradient(1.8px 1.8px at 78% 22%, rgba(255,255,255,0.55) 40%, transparent 41%),
+        radial-gradient(1.5px 1.5px at 62% 68%, rgba(255,255,255,0.45) 40%, transparent 41%),
+        radial-gradient(2.2px 2.2px at 38% 74%, rgba(255,255,255,0.55) 40%, transparent 41%),
+        radial-gradient(1.6px 1.6px at 90% 78%, rgba(255,255,255,0.35) 40%, transparent 41%);
+      opacity:0.45;
+      pointer-events:none;
+      animation: drift 10s linear infinite;
+    }
+
+    @keyframes drift{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(-18px, 10px, 0); }
+    }
+
+    /* Responsive: stack tiles on smaller screens */
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+      .top{ flex-direction:column; align-items:flex-start; }
+      .right{ text-align:left; white-space:normal; }
+    }
+
+    @media (max-width: 480px){
+      .wrap{ padding: 22px; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="sparkle" aria-hidden="true"></div>
+
+      <div class="top">
+        <div>
+          <h1 class="headline" id="headline">Welcome, 2026 🎉</h1>
+          <div class="sub" id="subtext">A fresh start. New goals. Same great team.</div>
+        </div>
+        <div class="yearBadge" id="badge">COUNTDOWN</div>
+      </div>
+
+      <div class="grid" role="group" aria-label="Countdown">
+        <div class="tile">
+          <div class="num" id="days">0</div>
+          <div class="label">Days</div>
+        </div>
+        <div class="tile">
+          <div class="num" id="hours">0</div>
+          <div class="label">Hours</div>
+        </div>
+        <div class="tile">
+          <div class="num" id="mins">0</div>
+          <div class="label">Minutes</div>
+        </div>
+        <div class="tile">
+          <div class="num" id="secs">0</div>
+          <div class="label">Seconds</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div id="targetLine">Target: Jan 1, 2026 • 12:00 AM (America/Chicago)</div>
+        <div class="right" id="statusLine">Updating…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /************* CONFIG *************/
+    // Target time: New Year's in America/New_York (handles EST/EDT correctly)
+    // You can change the ISO date below (YYYY-MM-DDTHH:mm:ss)
+    const TARGET_ISO_LOCAL = "2026-01-01T00:00:00";
+    const TARGET_TIMEZONE = "America/Chicago";
+
+    // Text you can change:
+    const HEADLINE_TEXT = "Welcome, 2026 🎉";
+    const SUBTEXT_TEXT  = "A fresh start. New goals. Same great team.";
+    const BADGE_TEXT    = "COUNTDOWN";
+
+    // When countdown hits zero:
+    const ZERO_HEADLINE = "Happy New Year! 🎆";
+    const ZERO_SUBTEXT  = "Wishing you a safe, successful, and joyful 2026.";
+    const ZERO_BADGE    = "IT'S HERE";
+
+    // Update frequency (ms). 1000 = every second.
+    const TICK_MS = 1000;
+    /*********** END CONFIG ***********/
+
+    const $ = (id) => document.getElementById(id);
+
+    $("headline").textContent = HEADLINE_TEXT;
+    $("subtext").textContent = SUBTEXT_TEXT;
+    $("badge").textContent   = BADGE_TEXT;
+
+    // Format helpers
+    const pad2 = (n) => String(n).padStart(2, "0");
+
+    // Build a Date representing TARGET in America/New_York, but convert for accurate difference
+    function getTargetDateUTC() {
+      // We interpret TARGET_ISO_LOCAL as local time in TARGET_TIMEZONE.
+      // Convert that timezone-local wall clock into an equivalent UTC instant.
+      // Approach: use Intl.DateTimeFormat to compute offset at that instant.
+      const parts = TARGET_ISO_LOCAL.split(/[-T:]/).map(Number); // [Y,M,D,H,m,s]
+      const y = parts[0], mo = parts[1], d = parts[2], h = parts[3], mi = parts[4], s = parts[5];
+
+      // Create a "fake" UTC date from the wall time
+      const asUTC = new Date(Date.UTC(y, mo - 1, d, h, mi, s));
+
+      // Determine the timezone offset (in minutes) for TARGET_TIMEZONE at that instant
+      const dtf = new Intl.DateTimeFormat("en-US", {
+        timeZone: TARGET_TIMEZONE,
+        hour12: false,
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+
+      // Format as if in timezone, then parse back to components,
+      // compare with asUTC to infer offset.
+      const formatted = dtf.format(asUTC);
+      // formatted like "12/31/2025, 19:00:00" depending on offset
+      const match = formatted.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s(\d{2}):(\d{2}):(\d{2})/);
+      const mm = Number(match[1]), dd = Number(match[2]), yyyy = Number(match[3]);
+      const HH = Number(match[4]), MM = Number(match[5]), SS = Number(match[6]);
+
+      const tzWallAsUTC = Date.UTC(yyyy, mm - 1, dd, HH, MM, SS);
+
+      // offset = tzWallAsUTC - asUTC (ms). If tz is behind UTC, this is negative.
+      const offsetMs = tzWallAsUTC - asUTC.getTime();
+
+      // Now shift asUTC back by offset to get the real UTC instant for the timezone wall time
+      return new Date(asUTC.getTime() - offsetMs);
+    }
+
+    const targetUTC = getTargetDateUTC();
+
+    function updateTargetLine() {
+      // Show a friendly target line using the timezone
+      $("targetLine").textContent = `Target: Jan 1, 2026 • 12:00 AM (${TARGET_TIMEZONE})`;
+    }
+
+    function tick() {
+      const now = new Date();
+      let diffMs = targetUTC.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        // Zero state
+        $("days").textContent  = "0";
+        $("hours").textContent = "0";
+        $("mins").textContent  = "0";
+        $("secs").textContent  = "0";
+
+        $("headline").textContent = ZERO_HEADLINE;
+        $("subtext").textContent  = ZERO_SUBTEXT;
+        $("badge").textContent    = ZERO_BADGE;
+
+        $("statusLine").textContent = "🎊";
+        return;
+      }
+
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const days  = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const mins  = Math.floor((totalSeconds % 3600) / 60);
+      const secs  = totalSeconds % 60;
+
+      $("days").textContent  = String(days);
+      $("hours").textContent = pad2(hours);
+      $("mins").textContent  = pad2(mins);
+      $("secs").textContent  = pad2(secs);
+
+      // Small status line with current time in the target timezone
+      const nowTZ = new Intl.DateTimeFormat("en-US", {
+        timeZone: TARGET_TIMEZONE,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        weekday: "short",
+        month: "short",
+        day: "2-digit"
+      }).format(now);
+
+      $("statusLine").textContent = `Time: ${nowTZ}`;
+    }
+
+    updateTargetLine();
+    tick();
+    setInterval(tick, TICK_MS);
+  </script>
+</body>
+</html>
